@@ -1,36 +1,30 @@
 //tabs=4
 // --------------------------------------------------------------------------------
-// TODO fill in this information for your driver, then remove this line!
 //
 // ASCOM Focuser driver for Iffley
 //
-// Description:	Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam 
-//				nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam 
-//				erat, sed diam voluptua. At vero eos et accusam et justo duo 
-//				dolores et ea rebum. Stet clita kasd gubergren, no sea takimata 
-//				sanctus est Lorem ipsum dolor sit amet.
+// Description:	Driver for the Arduino-based focuser
 //
-// Implements:	ASCOM Focuser interface version: <To be completed by driver developer>
-// Author:		(XXX) Your N. Here <your@email.here>
+// Implements:	ASCOM Focuser interface version: IFocuserV2 Interface
+// Author:		(TTT) Themos Tsikas <themos.tsikas@gmail.com>
 //
 // Edit Log:
 //
 // Date			Who	Vers	Description
 // -----------	---	-----	-------------------------------------------------------
-// dd-mmm-yyyy	XXX	6.0.0	Initial edit, created from ASCOM driver template
+// 13-May-2016	TTT	2.0.0	Initial edit, created from ASCOM driver template
+// 14-May-2016	TTT	2.0.1	Added Tim Long's SettingsProvider hooks
 // --------------------------------------------------------------------------------
 //
 
 
-// This is used to define code in the template that is specific to one class implementation
-// unused code canbe deleted and this definition removed.
-#define Focuser
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.IO.Ports;
 
 using ASCOM;
 using ASCOM.Astrometry;
@@ -49,10 +43,6 @@ namespace ASCOM.Iffley
     // The ClassInterface/None addribute prevents an empty interface called
     // _Iffley from being created and used as the [default] interface
     //
-    // TODO Replace the not implemented exceptions with code to implement the function or
-    // throw the appropriate ASCOM exception.
-    //
-
     /// <summary>
     /// ASCOM Focuser Driver for Iffley.
     /// </summary>
@@ -65,16 +55,20 @@ namespace ASCOM.Iffley
         /// The DeviceID is used by ASCOM applications to load the driver at runtime.
         /// </summary>
         public const string driverID = "ASCOM.Iffley.Focuser";
-        // TODO Change the descriptive string for your driver then remove this line
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        public const string driverDescription = "ASCOM Focuser Driver for Iffley.";
+        public const string driverDescription = "Iffley Arduino unipolar stepper motor focuser.";
 
         /// <summary>
-        /// Private variable to hold the connected state
+        /// Themos's added variables. 
+        /// Things I need to know in order to process requests
+        public static bool m_Connected = false; // am I connected to the Arduino
+        public static SerialPort m_Port;              // the port the Arduino is on
+        public static int m_Position;          // the current position of the focuser
+        private int m_MaxIncrement;      // the end of travel position (begins at 0)
+        private int m_MaxStep;           // the biggest step I can handle
         /// </summary>
-        private bool connectedState;
 
         /// <summary>
         /// Private variable to hold an ASCOM Utilities object
@@ -99,13 +93,14 @@ namespace ASCOM.Iffley
         {
             tl = new TraceLogger("", "Iffley");
             tl.Enabled = Properties.Settings.Default.TraceEnabled;
-            
+
             tl.LogMessage("Focuser", "Starting initialisation");
 
-            connectedState = false; // Initialise connected to false
+            m_Connected = false; // Initialise connected to false
+            m_MaxIncrement = Convert.ToInt32(Properties.Settings.Default.MaxIncrement);
+            m_MaxStep = Convert.ToInt32(Properties.Settings.Default.MaxStep); 
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
-            //TODO: Implement your additional construction here
 
             tl.LogMessage("Focuser", "Completed initialisation");
         }
@@ -127,9 +122,7 @@ namespace ASCOM.Iffley
         {
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
-            if (IsConnected)
-                System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
-
+        
             using (SetupDialogForm F = new SetupDialogForm())
             {
                 var result = F.ShowDialog();
@@ -203,37 +196,22 @@ namespace ASCOM.Iffley
             astroUtilities = null;
         }
 
-        public bool Connected
+        public bool Link
         {
             get
             {
-                LogMessage("Connected", "Get {0}", IsConnected);
-                return IsConnected;
+                tl.LogMessage("Link Get", this.Connected.ToString());
+                return this.Connected; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
             set
             {
-                tl.LogMessage("Connected", "Set {0}", value);
-                if (value == IsConnected)
-                    return;
-
-                if (value)
-                {
-                    connectedState = true;
-                    LogMessage("Connected Set", "Connecting to port {0}", Properties.Settings.Default.CommPortName);
-                    // TODO connect to the device
-                }
-                else
-                {
-                    connectedState = false;
-                    LogMessage("Connected Set", "Disconnecting from port {0}", Properties.Settings.Default.CommPortName);
-                    // TODO disconnect from the device
-                }
+                tl.LogMessage("Link Set", value.ToString());
+                this.Connected = value; // Direct function to the connected method, the Link method is just here for backwards compatibility
             }
         }
 
         public string Description
         {
-            // TODO customise this device description
             get
             {
                 tl.LogMessage("Description Get", driverDescription);
@@ -245,9 +223,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                // TODO customise this driver description
-                string driverInfo = "Information about the driver itself. Version: " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo = "Iffley Arduino unipolar stepper motor focuser.";
                 tl.LogMessage("DriverInfo Get", driverInfo);
                 return driverInfo;
             }
@@ -257,9 +233,8 @@ namespace ASCOM.Iffley
         {
             get
             {
-                Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverVersion = String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
-                tl.LogMessage("DriverVersion Get", driverVersion);
+                string driverVersion = "2.0";
+                tl.LogMessage("DriverVersion Get", "Version 2.0 for ASCOM 6.2" );
                 return driverVersion;
             }
         }
@@ -278,7 +253,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                string name = "Short driver name - please customise";
+                string name = "Iffley";
                 tl.LogMessage("Name Get", name);
                 return name;
             }
@@ -288,15 +263,14 @@ namespace ASCOM.Iffley
 
         #region IFocuser Implementation
 
-        private int focuserPosition = 0; // Class level variable to hold the current focuser position
         private const int focuserSteps = 10000;
 
         public bool Absolute
         {
             get
             {
-                tl.LogMessage("Absolute Get", true.ToString());
-                return true; // This is an absolute focuser
+                tl.LogMessage("Absolute Get", Properties.Settings.Default.AbsoluteEnabled.ToString());
+                return Properties.Settings.Default.AbsoluteEnabled; // from settings
             }
         }
 
@@ -310,31 +284,90 @@ namespace ASCOM.Iffley
         {
             get
             {
+                // I don't envisage more than one client at a time for the focuser and 
+                // all the moving is done while the Move function runs, so I am going to 
+                // always say false, here.
+                // It could be that a second client tries to execute one of these methods while the 
+                // first client is in the middle of a Move, so maybe we should keep a variable for this.
+                // care would be required to make sure there is no race conditions.
                 tl.LogMessage("IsMoving Get", false.ToString());
                 return false; // This focuser always moves instantaneously so no need for IsMoving ever to be True
             }
         }
 
-        public bool Link
+        public bool Connected
         {
             get
             {
-                tl.LogMessage("Link Get", this.Connected.ToString());
-                return this.Connected; // Direct function to the connected method, the Link method is just here for backwards compatibility
+                // the easy part
+                tl.LogMessage("Connected Get", m_Connected.ToString());
+                return m_Connected;
             }
             set
             {
-                tl.LogMessage("Link Set", value.ToString());
-                this.Connected = value; // Direct function to the connected method, the Link method is just here for backwards compatibility
+                tl.LogMessage("Connected Set", value.ToString());
+                // we need to bring up the link or tear it down or do nothing
+                if (m_Connected != value)
+                {
+                    // aha, we are asked to change the status of the link
+                    if (value)
+                    {
+                        // Turn it on using the remembered name, I've set the Arduino to 19200 rate
+                        m_Port = new SerialPort(Properties.Settings.Default.CommPortName, 19200);
+                        tl.LogMessage("Connected Set", "Port " + Properties.Settings.Default.CommPortName+ " created");
+
+                        // This is high-ish because the Arduino can take its time to respond when it resets
+                        m_Port.ReadTimeout = 5000;
+                        try
+                        {
+                            m_Port.Open();
+                            tl.LogMessage("Connected Set", "Port Opened");
+                        }
+                        catch
+                        {
+                            throw new DriverException("Could not open port " + Properties.Settings.Default.CommPortName);
+                        }
+                        try
+                        {
+                            // The Arduino is programmed to report a version string 
+                            string version = m_Port.ReadLine();
+                            // and then the position. when it resets
+                            string position = m_Port.ReadLine();
+                            m_Position = Convert.ToInt32(position);
+                            tl.LogMessage("Connected Set", "Confirmation " + version + " "+position);
+                        }
+                        catch (TimeoutException)
+                        {
+                            // it took too long, assume that the Arduino is not physically connected
+                            m_Port.Close();
+                            m_Port = null;
+                            m_Connected = false;
+                            throw new DriverException("Iffley device did not respond in time");
+
+                        }
+                        // we got the version and the position so we assume all is well
+                        // declare ourselves connected
+                        m_Connected = true;
+                    }
+                    else
+                    {
+                        //Turn it off
+                        m_Port.Close();
+                        m_Port = null;
+                        m_Connected = false;
+                    }
+                }
+
             }
         }
+
 
         public int MaxIncrement
         {
             get
             {
-                tl.LogMessage("MaxIncrement Get", focuserSteps.ToString());
-                return focuserSteps; // Maximum change in one move
+                tl.LogMessage("MaxIncrement Get", m_MaxIncrement.ToString());
+                return m_MaxIncrement; // Maximum change in one move
             }
         }
 
@@ -342,22 +375,85 @@ namespace ASCOM.Iffley
         {
             get
             {
-                tl.LogMessage("MaxStep Get", focuserSteps.ToString());
-                return focuserSteps; // Maximum extent of the focuser, so position range is 0 to 10,000
+                tl.LogMessage("MaxStep Get", m_MaxStep.ToString());
+                return m_MaxStep; // Maximum extent of the focuser, so position range is 0 to this
             }
         }
 
-        public void Move(int Position)
+        public void Move(int val)
         {
-            tl.LogMessage("Move", Position.ToString());
-            focuserPosition = Position; // Set the focuser position
+
+            int current, target;
+            string position;
+            tl.LogMessage("Move", val.ToString());
+            current = m_Position;
+            // The Arduino always reports an absolute position after each single-step command ("f" or "b")
+            if (Properties.Settings.Default.AbsoluteEnabled)
+            {
+                // we need to interpret val as an absolute position
+                // so just check that it is within the limits
+                if (val < 0) val = 0;
+                if (val > m_MaxStep) val = m_MaxStep;
+                // target is always an absolute position
+                target = val;
+            }
+            else
+            {
+                // we need to interpret val as a relative move
+                if (val >= 0)
+                {
+                    // make sure it's within limits
+                    if (val > m_MaxIncrement) val = m_MaxIncrement;
+                    // check that the resulting absolute position is within limits
+                    // target is always an absolute position
+                    if (current > (m_MaxStep - val)) target = m_MaxStep;
+                    else target = current + val;
+                }
+                else
+                {
+                    // similar for negative relative moves
+                    if (val < -m_MaxIncrement) val = -m_MaxIncrement;
+                    if (current < -val) target = 0;
+                    else target = current + val;
+                }
+            }
+            // now that target is sensible we just do single steps until we get there 
+            while (target != current)
+            {
+                if (target > current)
+                {
+                    // we need to increase the position, ask the Arduino to turn the stepper forward one step
+                    m_Port.Write("f");
+                    // Arduino always reports the new position (as a string)
+                    position = m_Port.ReadLine();
+                    // convert it to a number
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                }
+                if (target < current)
+                {
+                    // we need to decrease the position, ask the Arduino to turn the stepper backwards one step
+                    m_Port.Write("b");
+                    position = m_Port.ReadLine();
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                }
+            }
         }
 
         public int Position
         {
             get
             {
-                return focuserPosition; // Return the focuser position
+                if (Properties.Settings.Default.AbsoluteEnabled)
+                {
+                    // updated by Move, we don't ask the Arduino
+                    return m_Position;
+                }
+                else
+                {
+                    throw new PropertyNotImplementedException("Position", false);
+                }
             }
         }
 
@@ -481,25 +577,14 @@ namespace ASCOM.Iffley
 
         #endregion
 
-        /// <summary>
-        /// Returns true if there is a valid connection to the driver hardware
-        /// </summary>
-        private bool IsConnected
-        {
-            get
-            {
-                // TODO check that the driver hardware connection exists and is connected to the hardware
-                return connectedState;
-            }
-        }
-
+       
         /// <summary>
         /// Use this function to throw an exception if we aren't connected to the hardware
         /// </summary>
         /// <param name="message"></param>
         private void CheckConnected(string message)
         {
-            if (!IsConnected)
+            if (!m_Connected)
             {
                 throw new ASCOM.NotConnectedException(message);
             }
