@@ -110,7 +110,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="ASCOM.png" />
     <None Include="ASCOMDriverTemplate.snk" />
     <None Include="ClassDiagram1.cd" />
@@ -119,6 +121,8 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <Content Include="ASCOM.ico" />
+    <Content Include="Iffley Setup.iss" />
+    <Content Include="IffleyReadme.txt" />
     <Content Include="ReadMe.htm" />
     <None Include="Resources\ASCOM.bmp" />
   </ItemGroup>
