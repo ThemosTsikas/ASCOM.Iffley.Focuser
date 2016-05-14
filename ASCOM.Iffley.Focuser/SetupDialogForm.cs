@@ -17,15 +17,12 @@ namespace ASCOM.Iffley
         {
             InitializeComponent();
             // Initialise current values of user settings from the ASCOM Profile
-            //CMNT2 InitUI();
         }
 
         private void cmdOK_Click(object sender, EventArgs e) // OK button event handler
         {
             // Place any validation constraint checks here
             // Update the state variables with results from the dialogue
-            //CMNT1 Focuser.comPort = (string)comboBoxComPort.SelectedItem;
-            //CMNT1 Focuser.tl.Enabled = chkTrace.Checked;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler
@@ -63,6 +60,22 @@ namespace ASCOM.Iffley
         private void label3_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (!Focuser.m_Connected)
+                System.Windows.Forms.MessageBox.Show("Only possible when connected, just press OK");
+            else
+            {
+                Focuser.m_Port.Write("z");
+                Focuser.m_Position = 0;
+            }
         }
     }
 }
