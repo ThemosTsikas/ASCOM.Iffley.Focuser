@@ -25,7 +25,7 @@ namespace ASCOM.Iffley.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("COM3")]
+        [global::System.Configuration.DefaultSettingValueAttribute("COM5")]
         public string CommPortName {
             get {
                 return ((string)(this["CommPortName"]));
@@ -56,6 +56,42 @@ namespace ASCOM.Iffley.Properties {
             }
             set {
                 this["StepSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AbsoluteEnabled {
+            get {
+                return ((bool)(this["AbsoluteEnabled"]));
+            }
+            set {
+                this["AbsoluteEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("32000")]
+        public decimal MaxStep {
+            get {
+                return ((decimal)(this["MaxStep"]));
+            }
+            set {
+                this["MaxStep"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public decimal MaxIncrement {
+            get {
+                return ((decimal)(this["MaxIncrement"]));
+            }
+            set {
+                this["MaxIncrement"] = value;
             }
         }
     }
