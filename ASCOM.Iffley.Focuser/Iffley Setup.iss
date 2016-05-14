@@ -11,13 +11,13 @@ AppPublisher=Themos Tsikas <themos.tsikas@gmail.com>
 AppPublisherURL=mailto:themos.tsikas@gmail.com
 AppSupportURL=http://tech.groups.yahoo.com/group/ASCOM-Talk/
 AppUpdatesURL=http://ascom-standards.org/
-VersionInfoVersion=1.0.0
+VersionInfoVersion=2.0.0
 MinVersion=0,5.0.2195sp4
 DefaultDirName="{cf}\ASCOM\Focuser"
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir="."
-OutputBaseFilename="Iffley Setup"
+OutputBaseFilename="Iffley Setup 2.0.0"
 Compression=lzma
 SolidCompression=yes
 ; Put there by Platform if Driver Installer Support selected
