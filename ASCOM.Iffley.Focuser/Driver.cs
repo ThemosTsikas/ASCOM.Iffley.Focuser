@@ -14,6 +14,7 @@
 // -----------	---	-----	-------------------------------------------------------
 // 13-May-2016	TTT	2.0.0	Initial edit, created from ASCOM driver template
 // 14-May-2016	TTT	2.0.1	Added Tim Long's SettingsProvider hooks
+// 15-May-2016  TTT 2.1.0   Added test program and SupportedAction ResetToZero
 // --------------------------------------------------------------------------------
 //
 
@@ -64,10 +65,11 @@ namespace ASCOM.Iffley
         /// Themos's added variables. 
         /// Things I need to know in order to process requests
         public static bool m_Connected = false; // am I connected to the Arduino
-        public static SerialPort m_Port;              // the port the Arduino is on
-        public static int m_Position;          // the current position of the focuser
-        private int m_MaxIncrement;      // the end of travel position (begins at 0)
-        private int m_MaxStep;           // the biggest step I can handle
+        public static SerialPort m_Port;        // the port the Arduino is on
+        public static int m_Position;           // the current position of the focuser
+        private ArrayList m_Actions;            // the supported actions
+        private int m_MaxIncrement;             // the end of travel position (begins at 0)
+        private int m_MaxStep;                  // the biggest step I can handle
         /// </summary>
 
         /// <summary>
@@ -98,7 +100,9 @@ namespace ASCOM.Iffley
 
             m_Connected = false; // Initialise connected to false
             m_MaxIncrement = Convert.ToInt32(Properties.Settings.Default.MaxIncrement);
-            m_MaxStep = Convert.ToInt32(Properties.Settings.Default.MaxStep); 
+            m_MaxStep = Convert.ToInt32(Properties.Settings.Default.MaxStep);
+            m_Actions = new ArrayList();
+            m_Actions.Add("Focuser:ResetToZero");
             utilities = new Util(); //Initialise util object
             astroUtilities = new AstroUtils(); // Initialise astro utilities object
 
@@ -144,15 +148,34 @@ namespace ASCOM.Iffley
             get
             {
                 tl.LogMessage("SupportedActions Get", "Returning empty arraylist");
-                return new ArrayList();
+                return m_Actions;
             }
         }
 
         public string Action(string actionName, string actionParameters)
         {
-            LogMessage("", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
-            throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
-        }
+            if (actionName == "ResetToZero")
+            {
+                if (m_Connected)
+                {
+                    m_Port.Write("z");
+                    // Arduino always reports the new position (as a string)
+                    // convert it to a number
+                    m_Position = Convert.ToInt32(m_Port.ReadLine());
+                    LogMessage("Action", "ResetToZero successful");
+                    return "OK";
+                } 
+                else
+                {
+                    LogMessage("Action", "ResetToZero failed, not connected");
+                    return "";
+                }
+            }
+            else
+            {
+                LogMessage("Action", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
+                throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
+            }        }
 
         public void CommandBlind(string command, bool raw)
         {
@@ -233,8 +256,8 @@ namespace ASCOM.Iffley
         {
             get
             {
-                string driverVersion = "2.0";
-                tl.LogMessage("DriverVersion Get", "Version 2.0 for ASCOM 6.2" );
+                string driverVersion = "2.1";
+                tl.LogMessage("DriverVersion Get", "Version 2.1 for ASCOM 6.2" );
                 return driverVersion;
             }
         }
@@ -262,8 +285,6 @@ namespace ASCOM.Iffley
         #endregion
 
         #region IFocuser Implementation
-
-        private const int focuserSteps = 10000;
 
         public bool Absolute
         {
@@ -317,7 +338,8 @@ namespace ASCOM.Iffley
                         tl.LogMessage("Connected Set", "Port " + Properties.Settings.Default.CommPortName+ " created");
 
                         // This is high-ish because the Arduino can take its time to respond when it resets
-                        m_Port.ReadTimeout = 5000;
+                        m_Port.ReadTimeout = Convert.ToInt32(
+                            Convert.ToDouble(Properties.Settings.Default.TimeoutSeconds) * (1000));
                         try
                         {
                             m_Port.Open();
@@ -420,7 +442,17 @@ namespace ASCOM.Iffley
             // now that target is sensible we just do single steps until we get there 
             while (target != current)
             {
-                if (target > current)
+                if (target > 10+current)
+                {
+                    // we need to increase the position, ask the Arduino to turn the stepper forward one big step (10)
+                    m_Port.Write("F");
+                    // Arduino always reports the new position (as a string)
+                    position = m_Port.ReadLine();
+                    // convert it to a number
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                }
+                else if (target > current)
                 {
                     // we need to increase the position, ask the Arduino to turn the stepper forward one step
                     m_Port.Write("f");
@@ -430,7 +462,15 @@ namespace ASCOM.Iffley
                     current = Convert.ToInt32(position);
                     m_Position = current;
                 }
-                if (target < current)
+                else if (target < current-10)
+                {
+                    // we need to decrease the position, ask the Arduino to turn the stepper backwards one big step (10)
+                    m_Port.Write("B");
+                    position = m_Port.ReadLine();
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                }
+                else if (target < current)
                 {
                     // we need to decrease the position, ask the Arduino to turn the stepper backwards one step
                     m_Port.Write("b");

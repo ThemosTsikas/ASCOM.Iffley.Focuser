@@ -94,5 +94,17 @@ namespace ASCOM.Iffley.Properties {
                 this["MaxIncrement"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public decimal TimeoutSeconds {
+            get {
+                return ((decimal)(this["TimeoutSeconds"]));
+            }
+            set {
+                this["TimeoutSeconds"] = value;
+            }
+        }
     }
 }

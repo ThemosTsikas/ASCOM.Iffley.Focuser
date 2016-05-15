@@ -6,7 +6,7 @@ int ledPin = 13;
 // These are the pins that are used to drive the unipolar
 // stepper motor (via the Darlington array), indexed by 1-4
 byte coilPins[] = {
-  -1,3,5,6,9};
+  255,3,5,6,9};
 
 // variable that keeps track of the position of the focuser.
 // this is reported back to the port after every received 
@@ -33,11 +33,11 @@ void setup()
   pinMode(coilPins[3],OUTPUT);
   pinMode(coilPins[4],OUTPUT);
   // flash the LED in a particular sequence: Morse _ _ . . . 
-  ledflash(200);    
-  ledflash(200);
-  ledflash(100); 
-  ledflash(100); 
-  ledflash(100); 
+  ledflash(100);    
+  ledflash(100);
+  ledflash(50); 
+  ledflash(50); 
+  ledflash(50); 
   // opens serial port, sets data rate to 19200 bps
   Serial.begin(19200);	
   // send the identification
@@ -69,11 +69,36 @@ void loop()
     // a command to move forward, do it and update the position
       position = forward(position);
       break;
+    case 'F':
+    // a command to move forward, do it and update the position
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      position = forward(position);
+      break;
     case 'b':
     // a command to move backward, do it and update the position
       position = backward(position);
       break;
-    case 'z':
+    case 'B':
+    // a command to move backward, do it and update the position
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      position = backward(position);
+      break;    case 'z':
     // a command to reset, set phase to 0 and update the position
       position = 0;
       phaserinit(position);

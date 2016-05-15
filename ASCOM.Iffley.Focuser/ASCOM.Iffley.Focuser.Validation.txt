@@ -1,4 +1,4 @@
-Conform Report Hash (V1): 929F3CA1098046030C60624F515CA3CBA5B68F5E9202C103787E469DA02349F2E9219CC92FEE0D7AE0A389426C85AC27BCE79B3CB5860797E899A6A1E909100E
+Conform Report Hash (V1): 6055F53259AB269DB7601AB5F9AD7EDE564C6EB0746FE4211B3D675167AD0F967FE342036486688EF397B51A4935D2A4DFB0999592EBC4703F006EA5113F5CF4
 
  
 ConformanceCheck ASCOM Device Conformance Checker Version 6.2.58.0, Build time: 02/12/2015 08:30:46
@@ -13,58 +13,58 @@ Error number for "Value Not Set 1" is: 80040402
 Error number for "Value Not Set 2" is: 80040403
 Error messages will not be interpreted to infer state.
  
-22:11:21.397 Driver Access Checks            OK       
-22:11:22.027 AccessChecks                    OK       Successfully created driver using late binding
-22:11:25.034 AccessChecks                    OK       Successfully connected using late binding
-22:11:25.036 AccessChecks                    INFO     The driver is a .NET object
-22:11:25.039 AccessChecks                    INFO     The AssemblyQualifiedName is: ASCOM.Iffley.Focuser, ASCOM.Iffley.Focuser, Version=6.2.5978.39661, Culture=
-22:11:25.043 AccessChecks                    INFO     The driver implements interface: ASCOM.DeviceInterface.IFocuserV2
-22:11:25.671 AccessChecks                    INFO     Device does not expose IFocuser interface
-22:11:28.580 AccessChecks                    INFO     Device exposes IFocuserV2 interface
-22:11:28.716 AccessChecks                    OK       Successfully created driver using driver access toolkit
-22:11:31.476 AccessChecks                    OK       Successfully connected using driver access toolkit
-22:11:31.593 AccessChecks                    OK       Successfully disconnected using driver access toolkit
+23:39:42.055 Driver Access Checks            OK       
+23:39:42.687 AccessChecks                    OK       Successfully created driver using late binding
+23:39:44.986 AccessChecks                    OK       Successfully connected using late binding
+23:39:44.988 AccessChecks                    INFO     The driver is a .NET object
+23:39:44.992 AccessChecks                    INFO     The AssemblyQualifiedName is: ASCOM.Iffley.Focuser, ASCOM.Iffley.Focuser, Version=6.2.5979.42555, Culture=
+23:39:44.995 AccessChecks                    INFO     The driver implements interface: ASCOM.DeviceInterface.IFocuserV2
+23:39:45.626 AccessChecks                    INFO     Device does not expose IFocuser interface
+23:39:47.829 AccessChecks                    INFO     Device exposes IFocuserV2 interface
+23:39:47.970 AccessChecks                    OK       Successfully created driver using driver access toolkit
+23:39:50.164 AccessChecks                    OK       Successfully connected using driver access toolkit
+23:39:50.281 AccessChecks                    OK       Successfully disconnected using driver access toolkit
  
 Conform is using ASCOM.DriverAccess.Focuser to get a Focuser object
-22:11:31.622 ConformanceCheck                OK       Driver instance created successfully
-22:11:34.370 ConformanceCheck                OK       Connected OK
+23:39:50.313 ConformanceCheck                OK       Driver instance created successfully
+23:39:52.500 ConformanceCheck                OK       Connected OK
  
 Common Driver Methods 
-22:11:34.382 InterfaceVersion                OK       2
-22:11:34.389 Connected                       OK       True
-22:11:34.393 Description                     OK       Iffley Arduino unipolar stepper motor focuser.
-22:11:34.399 DriverInfo                      OK       Iffley Arduino unipolar stepper motor focuser.
-22:11:34.404 DriverVersion                   OK       2.0
-22:11:34.410 Name                            OK       Iffley
-22:11:34.414 CommandString                   INFO     Conform cannot test the CommandString method
-22:11:34.417 CommandBlind                    INFO     Conform cannot test the CommandBlind method
-22:11:34.421 CommandBool                     INFO     Conform cannot test the CommandBool method
-22:11:34.424 Action                          INFO     Conform cannot test the Action method
-22:11:34.427 SupportedActions                OK       Driver returned an empty action list
+23:39:52.513 InterfaceVersion                OK       2
+23:39:52.521 Connected                       OK       True
+23:39:52.527 Description                     OK       Iffley Arduino unipolar stepper motor focuser.
+23:39:52.534 DriverInfo                      OK       Iffley Arduino unipolar stepper motor focuser.
+23:39:52.540 DriverVersion                   OK       2.1
+23:39:52.545 Name                            OK       Iffley
+23:39:52.550 CommandString                   INFO     Conform cannot test the CommandString method
+23:39:52.553 CommandBlind                    INFO     Conform cannot test the CommandBlind method
+23:39:52.556 CommandBool                     INFO     Conform cannot test the CommandBool method
+23:39:52.559 Action                          INFO     Conform cannot test the Action method
+23:39:52.564 SupportedActions                OK       Focuser:ResetToZero
  
 Properties 
-22:11:34.443 Absolute                        OK       True
-22:11:34.447 IsMoving                        OK       False
-22:11:34.450 MaxStep                         OK       32000
-22:11:34.454 MaxIncrement                    OK       100
-22:11:34.458 Position                        OK       0
-22:11:34.462 StepSize                        OK       12
-22:11:34.467 TempCompAvailable               OK       False
-22:11:34.471 TempComp Read                   OK       False
-22:11:34.477 StepSize                        OK       temerature compensation is not available and a PropertyNotImplementedException exception was generated as expected
-22:11:34.483 Temperature                     OK       Optional member threw a PropertyNotImplementedException exception.
+23:39:52.581 Absolute                        OK       True
+23:39:52.586 IsMoving                        OK       False
+23:39:52.590 MaxStep                         OK       64000
+23:39:52.594 MaxIncrement                    OK       10000
+23:39:52.598 Position                        OK       0
+23:39:52.603 StepSize                        OK       12
+23:39:52.607 TempCompAvailable               OK       False
+23:39:52.612 TempComp Read                   OK       False
+23:39:52.624 StepSize                        OK       temerature compensation is not available and a PropertyNotImplementedException exception was generated as expected
+23:39:52.633 Temperature                     OK       Optional member threw a PropertyNotImplementedException exception.
  
 Methods 
-22:11:34.500 Halt                            OK       Optional member threw a MethodNotImplementedException exception.
-22:11:34.507 Move                                     Moving to position: 100
-22:11:36.114 Move                            OK       Synchronous move found
-22:11:36.118 Move                            OK       Absolute move OK
-22:11:36.127 Move                            INFO     Returning to original position: 0
+23:39:52.652 Halt                            OK       Optional member threw a MethodNotImplementedException exception.
+23:39:52.661 Move                                     Moving to position: 6400
+23:40:03.056 Move                            OK       Synchronous move found
+23:40:03.062 Move                            OK       Absolute move OK
+23:40:03.071 Move                            INFO     Returning to original position: 0
  
 Performance 
-22:11:42.751 Position                        INFO     Transaction rate: 64111.9 per second
-22:11:47.759 IsMoving                        INFO     Transaction rate: 77771.0 per second
-22:11:47.768 Temperature                     INFO     Unable to complete test: Property read Temperature is not implemented in this driver.
+23:40:18.475 Position                        INFO     Transaction rate: 62740.3 per second
+23:40:23.484 IsMoving                        INFO     Transaction rate: 76033.3 per second
+23:40:23.492 Temperature                     INFO     Unable to complete test: Property read Temperature is not implemented in this driver.
  
 Conformance test complete 
  

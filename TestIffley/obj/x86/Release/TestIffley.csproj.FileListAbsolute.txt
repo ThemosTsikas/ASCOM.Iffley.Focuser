@@ -1,0 +1,16 @@
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Iffley.Test.exe.config
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Iffley.Test.exe
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Iffley.Test.pdb
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.DeviceInterfaces.dll
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.DriverAccess.dll
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Utilities.dll
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Exceptions.dll
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.DeviceInterfaces.xml
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.DriverAccess.xml
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Utilities.xml
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\bin\Release\ASCOM.Exceptions.xml
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\obj\x86\Release\ASCOM.Iffley.Form1.resources
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\obj\x86\Release\ASCOM.Iffley.Properties.Resources.resources
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\obj\x86\Release\TestIffley.csproj.GenerateResource.Cache
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\obj\x86\Release\ASCOM.Iffley.Test.exe
+C:\Users\themos\Documents\GitHub\ASCOM.Iffley.Focuser\TestIffley\obj\x86\Release\ASCOM.Iffley.Test.pdb
