@@ -41,7 +41,7 @@ void setup()
   // opens serial port, sets data rate to 19200 bps
   Serial.begin(19200);	
   // send the identification
-  Serial.println("Iffley Focuser Version 2.0");
+  Serial.println("Iffley Focuser Version 2.1");
   // set the position to zero
   position = 0;
   // set the coils to phase corresponding to position
