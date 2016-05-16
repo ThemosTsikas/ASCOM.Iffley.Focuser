@@ -34,6 +34,7 @@ using ASCOM.Utilities;
 using ASCOM.DeviceInterface;
 using System.Globalization;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace ASCOM.Iffley
 {
@@ -126,9 +127,10 @@ namespace ASCOM.Iffley
         {
             // consider only showing the setup dialog if not connected
             // or call a different dialog if connected
-        
+
             using (SetupDialogForm F = new SetupDialogForm())
             {
+                tl.LogMessage("SetupDialog", "");
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
@@ -147,7 +149,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                tl.LogMessage("SupportedActions Get", "Returning empty arraylist");
+                tl.LogMessage("SupportedActions Get", m_Actions.ToString());
                 return m_Actions;
             }
         }
@@ -162,48 +164,37 @@ namespace ASCOM.Iffley
                     // Arduino always reports the new position (as a string)
                     // convert it to a number
                     m_Position = Convert.ToInt32(m_Port.ReadLine());
-                    LogMessage("Action", "ResetToZero successful");
+                    FancyLogMessage("Action", "ResetToZero successful");
                     return "OK";
-                } 
+                }
                 else
                 {
-                    LogMessage("Action", "ResetToZero failed, not connected");
+                    tl.LogMessage("Action", "ResetToZero failed, not connected");
                     return "";
                 }
             }
             else
             {
-                LogMessage("Action", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
+                FancyLogMessage("Action", "Action {0}, parameters {1} not implemented", actionName, actionParameters);
                 throw new ASCOM.ActionNotImplementedException("Action " + actionName + " is not implemented by this driver");
-            }        }
+            }
+        }
 
         public void CommandBlind(string command, bool raw)
         {
-            CheckConnected("CommandBlind");
-            // Call CommandString and return as soon as it finishes
-            this.CommandString(command, raw);
-            // or
+            tl.LogMessage("CommandBlind", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("CommandBlind");
-            // DO NOT have both these sections!  One or the other
         }
 
         public bool CommandBool(string command, bool raw)
         {
-            CheckConnected("CommandBool");
-            string ret = CommandString(command, raw);
-            // TODO decode the return string and return true or false
-            // or
+            tl.LogMessage("CommandBlindBool", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("CommandBool");
-            // DO NOT have both these sections!  One or the other
         }
 
         public string CommandString(string command, bool raw)
         {
-            CheckConnected("CommandString");
-            // it's a good idea to put all the low level communication with the device here,
-            // then all communication calls this function
-            // you need something to ensure that only one command is in progress at a time
-
+            tl.LogMessage("CommandString", "Not implemented");
             throw new ASCOM.MethodNotImplementedException("CommandString");
         }
 
@@ -257,7 +248,7 @@ namespace ASCOM.Iffley
             get
             {
                 string driverVersion = "2.1";
-                tl.LogMessage("DriverVersion Get", "Version 2.1 for ASCOM 6.2" );
+                tl.LogMessage("DriverVersion Get", driverVersion);
                 return driverVersion;
             }
         }
@@ -267,7 +258,7 @@ namespace ASCOM.Iffley
             // set by the driver wizard
             get
             {
-                LogMessage("InterfaceVersion Get", "2");
+                tl.LogMessage("InterfaceVersion Get", "2");
                 return Convert.ToInt16("2");
             }
         }
@@ -335,7 +326,7 @@ namespace ASCOM.Iffley
                     {
                         // Turn it on using the remembered name, I've set the Arduino to 19200 rate
                         m_Port = new SerialPort(Properties.Settings.Default.CommPortName, 19200);
-                        tl.LogMessage("Connected Set", "Port " + Properties.Settings.Default.CommPortName+ " created");
+                        tl.LogMessage("Connected Set", "Port " + Properties.Settings.Default.CommPortName + " created");
 
                         // This is high-ish because the Arduino can take its time to respond when it resets
                         m_Port.ReadTimeout = Convert.ToInt32(
@@ -356,7 +347,7 @@ namespace ASCOM.Iffley
                             // and then the position. when it resets
                             string position = m_Port.ReadLine();
                             m_Position = Convert.ToInt32(position);
-                            tl.LogMessage("Connected Set", "Confirmation " + version + " "+position);
+                            tl.LogMessage("Connected Set", "Confirmation " + Regex.Replace(version,@"\t|\r|\n",""));
                         }
                         catch (TimeoutException)
                         {
@@ -442,7 +433,7 @@ namespace ASCOM.Iffley
             // now that target is sensible we just do single steps until we get there 
             while (target != current)
             {
-                if (target > 10+current)
+                if (target > 10 + current)
                 {
                     // we need to increase the position, ask the Arduino to turn the stepper forward one big step (10)
                     m_Port.Write("F");
@@ -451,6 +442,7 @@ namespace ASCOM.Iffley
                     // convert it to a number
                     current = Convert.ToInt32(position);
                     m_Position = current;
+                    tl.LogMessage("Move", "F step");
                 }
                 else if (target > current)
                 {
@@ -461,14 +453,18 @@ namespace ASCOM.Iffley
                     // convert it to a number
                     current = Convert.ToInt32(position);
                     m_Position = current;
+                    tl.LogMessage("Move", "f step");
+
                 }
-                else if (target < current-10)
+                else if (target < current - 10)
                 {
                     // we need to decrease the position, ask the Arduino to turn the stepper backwards one big step (10)
                     m_Port.Write("B");
                     position = m_Port.ReadLine();
                     current = Convert.ToInt32(position);
                     m_Position = current;
+                    tl.LogMessage("Move", "B step");
+
                 }
                 else if (target < current)
                 {
@@ -477,6 +473,7 @@ namespace ASCOM.Iffley
                     position = m_Port.ReadLine();
                     current = Convert.ToInt32(position);
                     m_Position = current;
+                    tl.LogMessage("Move", "b step");
                 }
             }
         }
@@ -488,6 +485,7 @@ namespace ASCOM.Iffley
                 if (Properties.Settings.Default.AbsoluteEnabled)
                 {
                     // updated by Move, we don't ask the Arduino
+                    tl.LogMessage("Position Get", m_Position.ToString());
                     return m_Position;
                 }
                 else
@@ -501,6 +499,7 @@ namespace ASCOM.Iffley
         {
             get
             {
+                tl.LogMessage("StepSize Get", Properties.Settings.Default.StepSize.ToString());
                 return Convert.ToDouble(Properties.Settings.Default.StepSize);
             }
         }
@@ -617,7 +616,7 @@ namespace ASCOM.Iffley
 
         #endregion
 
-       
+
         /// <summary>
         /// Use this function to throw an exception if we aren't connected to the hardware
         /// </summary>
@@ -636,7 +635,7 @@ namespace ASCOM.Iffley
         /// <param name="identifier"></param>
         /// <param name="message"></param>
         /// <param name="args"></param>
-        internal static void LogMessage(string identifier, string message, params object[] args)
+        internal static void FancyLogMessage(string identifier, string message, params object[] args)
         {
             var msg = string.Format(message, args);
             tl.LogMessage(identifier, msg);

@@ -73,7 +73,7 @@ namespace ASCOM.Iffley.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("32000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("64000")]
         public decimal MaxStep {
             get {
                 return ((decimal)(this["MaxStep"]));

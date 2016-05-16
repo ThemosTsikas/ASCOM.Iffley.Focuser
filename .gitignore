@@ -1,1 +1,4 @@
-.vs/ASCOM.Iffley.Focuser/v14/.suo
+/TestIffley/bin/Debug
+/ASCOM.Iffley.Focuser/bin/Debug
+/ASCOM.Iffley.Focuser/obj
+/TestIffley/obj/x86/Debug
