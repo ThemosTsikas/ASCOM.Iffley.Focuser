@@ -49,7 +49,7 @@ namespace ASCOM.Iffley.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("12")]
+        [global::System.Configuration.DefaultSettingValueAttribute("24.15")]
         public decimal StepSize {
             get {
                 return ((decimal)(this["StepSize"]));

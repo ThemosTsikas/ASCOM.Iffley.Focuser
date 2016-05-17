@@ -9,7 +9,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="StepSize" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">12</Value>
+      <Value Profile="(Default)">24.15</Value>
     </Setting>
     <Setting Name="AbsoluteEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

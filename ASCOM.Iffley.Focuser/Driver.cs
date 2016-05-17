@@ -17,6 +17,9 @@
 // 15-May-2016  TTT 2.1.0   Added test program and SupportedAction ResetToZero
 // 16-May-2016  TTT 2.1.1   refactored the ResetToZero function, in Dialog and via Action
 // 16-May-2016  TTT 3.0.0   new protocol, "idIDz" until we figure out timings for larger steps
+// 17-May-2016  TTT 4.0.0   Asynchronous accelerated stepper, new protocol 
+                            //TODO set speed, set accel in SetupDialog and Actions
+                            //TODO update doc
 // --------------------------------------------------------------------------------
 //
 
@@ -245,7 +248,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                string driverVersion = "3.0";
+                string driverVersion = "4.0";
                 tl.LogMessage("DriverVersion Get", driverVersion);
                 return driverVersion;
             }
@@ -286,22 +289,42 @@ namespace ASCOM.Iffley
 
         public void Halt()
         {
-            tl.LogMessage("Halt", "Not implemented");
-            throw new ASCOM.MethodNotImplementedException("Halt");
+            tl.LogMessage("Halt", "");
+            m_Port.Write("h");
+            tl.LogMessage("Protocol h", "");
         }
 
         public bool IsMoving
         {
             get
             {
-                // I don't envisage more than one client at a time for the focuser and 
-                // all the moving is done while the Move function runs, so I am going to 
-                // always say false, here.
                 // It could be that a second client tries to execute one of these methods while the 
-                // first client is in the middle of a Move, so maybe we should keep a variable for this.
                 // care would be required to make sure there is no race conditions.
-                tl.LogMessage("IsMoving Get", false.ToString());
-                return false; // This focuser always moves instantaneously so no need for IsMoving ever to be True
+                if (!m_Connected)
+                {
+                    tl.LogMessage("IsMoving Get", false.ToString());
+                    return false;
+                }
+                else
+                {
+                    m_Port.Write("?");
+                    string speed = m_Port.ReadLine();
+                    string accel = m_Port.ReadLine();
+                    string position = m_Port.ReadLine();
+                    string target = m_Port.ReadLine();
+                    tl.LogMessage("Protocol ?",
+                       speed + " " + accel + " " + position + " " + target);
+                    if (Convert.ToInt32(position) == Convert.ToInt32(target))
+                    {
+                        tl.LogMessage("IsMoving Get", false.ToString());
+                        return false;
+                    }
+                    else
+                    {
+                        tl.LogMessage("IsMoving Get", true.ToString());
+                        return true;
+                    }
+                }
             }
         }
 
@@ -342,9 +365,7 @@ namespace ASCOM.Iffley
                         {
                             // The Arduino is programmed to report a version string 
                             string version = m_Port.ReadLine();
-                            // and then the position. when it resets
-                            string position = m_Port.ReadLine();
-                            m_Position = Convert.ToInt32(position);
+                            m_Position = 0;
                             tl.LogMessage("Connected Set", "Confirmation " + Regex.Replace(version, @"\t|\r|\n", ""));
                         }
                         catch (TimeoutException)
@@ -356,7 +377,7 @@ namespace ASCOM.Iffley
                             throw new DriverException("Iffley device did not respond in time");
 
                         }
-                        // we got the version and the position so we assume all is well
+                        // we got the version so we assume all is well
                         // declare ourselves connected
                         m_Connected = true;
                     }
@@ -429,79 +450,10 @@ namespace ASCOM.Iffley
                     else target = current + val;
                 }
             }
-            // now that target is sensible we just do single steps until we get there 
-            while (target != current)
-            {
-                if (false && (target > 100 + current))
-                {
-                    // we need to increase the position, ask the Arduino to turn the 
-                    // stepper forward one giant step (100)
-                    m_Port.Write("C");
-                    // Arduino always reports the new position (as a string)
-                    position = m_Port.ReadLine();
-                    // convert it to a number
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "C step");
-                }
-                else if (false && (target > 10 + current))
-                {
-                    // we need to increase the position, ask the Arduino to turn the 
-                    // stepper forward one big step (10)
-                    m_Port.Write("D");
-                    // Arduino always reports the new position (as a string)
-                    position = m_Port.ReadLine();
-                    // convert it to a number
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "D step");
-                }
-                else if (target > current)
-                {
-                    // we need to increase the position, ask the Arduino to turn the stepper forward one step
-                    m_Port.Write("I");
-                    // Arduino always reports the new position (as a string)
-                    position = m_Port.ReadLine();
-                    // convert it to a number
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "I step");
-
-                }
-                else if (false && (target < current - 100))
-                {
-                    // we need to decrease the position, ask the Arduino to turn the 
-                    // stepper backwards one giant step (100)
-                    m_Port.Write("c");
-                    position = m_Port.ReadLine();
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "c step");
-
-                }
-                else if (false && (target < current - 10))
-                {
-                    // we need to decrease the position, ask the Arduino to turn the
-                    // stepper backwards one big step (10)
-                    m_Port.Write("d");
-                    position = m_Port.ReadLine();
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "d step");
-
-                }
-                else if (target < current)
-                {
-                    // we need to decrease the position, ask the Arduino to turn the
-                    // stepper backwards one step
-                    m_Port.Write("i");
-                    position = m_Port.ReadLine();
-                    current = Convert.ToInt32(position);
-                    m_Position = current;
-                    tl.LogMessage("Move", "i step");
-                }
-            }
+            m_Port.Write("t" + Convert.ToString(target));
+            tl.LogMessage("Protocol t", Convert.ToString(target));
         }
+
 
         public int Position
         {
@@ -509,9 +461,15 @@ namespace ASCOM.Iffley
             {
                 if (Properties.Settings.Default.AbsoluteEnabled)
                 {
-                    // updated by Move, we don't ask the Arduino
-                    tl.LogMessage("Position Get", m_Position.ToString());
-                    return m_Position;
+                    m_Port.Write("?");
+                    string speed = m_Port.ReadLine();
+                    string accel = m_Port.ReadLine();
+                    string position = m_Port.ReadLine();
+                    string target = m_Port.ReadLine();
+                    tl.LogMessage("Protocol ?",
+                        speed + " " + accel + " " + position + " " + target);
+                    tl.LogMessage("Position Get", position);
+                    return Convert.ToInt32(position);
                 }
                 else
                 {
@@ -667,12 +625,11 @@ namespace ASCOM.Iffley
         }
         internal static void ResetToZero()
         {
+            m_Port.Write("h");
+            tl.LogMessage("Protocol h", "");
             m_Port.Write("z");
-            // Arduino always reports the new position (as a string)
-            // convert it to a number
-            m_Position = Convert.ToInt32(m_Port.ReadLine());
+            tl.LogMessage("Protocol z", "");
             tl.LogMessage("Action", "ResetToZero successful");
-
         }
         #endregion
     }

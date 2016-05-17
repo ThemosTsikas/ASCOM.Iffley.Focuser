@@ -118,6 +118,7 @@
     <None Include="ASCOMDriverTemplate.snk" />
     <None Include="ClassDiagram1.cd" />
     <None Include="Iffley_Focuser_Version_2_0\Iffley_Focuser_Version_2_0.ino" />
+    <None Include="Iffley_Focuser_Version_4_0\Iffley_Focuser_Version_4_0.ino" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
