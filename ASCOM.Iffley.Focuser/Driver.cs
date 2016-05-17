@@ -444,7 +444,7 @@ namespace ASCOM.Iffley
                     m_Position = current;
                     tl.LogMessage("Move", "C step");
                 }
-                else if (target > 10 + current)
+                else if (false && (target > 10 + current))
                 {
                     // we need to increase the position, ask the Arduino to turn the 
                     // stepper forward one big step (10)
@@ -479,7 +479,7 @@ namespace ASCOM.Iffley
                     tl.LogMessage("Move", "c step");
 
                 }
-                else if (target < current - 10)
+                else if (false && (target < current - 10))
                 {
                     // we need to decrease the position, ask the Arduino to turn the
                     // stepper backwards one big step (10)

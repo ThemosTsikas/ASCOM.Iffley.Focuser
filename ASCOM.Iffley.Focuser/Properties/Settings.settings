@@ -18,7 +18,7 @@
       <Value Profile="(Default)">64000</Value>
     </Setting>
     <Setting Name="MaxIncrement" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">100</Value>
+      <Value Profile="(Default)">32000</Value>
     </Setting>
     <Setting Name="TimeoutSeconds" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">5</Value>

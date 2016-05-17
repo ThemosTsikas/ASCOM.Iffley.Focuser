@@ -85,7 +85,7 @@ namespace ASCOM.Iffley.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("32000")]
         public decimal MaxIncrement {
             get {
                 return ((decimal)(this["MaxIncrement"]));
