@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>ASCOM Iffley Focuser driver</title>
+</head>
+<body>
+    <h1>Introduction</h1>
+    <p>The driver is written in C# and currently targets ASCOM Platform 6.2</p>
+    <p>If installation has succeeded, you will see this entry in the Chooser</p>
+    <code>Iffley Arduino unipolar stepper motor focuser</code>
+
+    <p>You can then proceed to try it with an ASCOM client (APT,
+ASCOM Conformance Checker, FocusMax).</p>
+
+    <p>The Properties Dialog looks like this</p>
+    <img src="SetupDialog.png" />
+    </p>
+    <p>The fields are mostly self-explanatory: 
+    You will need to figure which COM port corresponds
+to the Arduino that runs the focuser (use the Device Manager).</p>
+    <p>The Step Size is something you will be able to calculate for your particular mechanical 
+    setup, move the focuser10000 steps and get your ruler out!</p>
+    <p>Try not to exceed 65000 for Max Step, this is the maximum
+        extent of the focuser's travel (the other limit being the 0 point). The Arduino counter
+        will overflow after 65535 so that's the reason for this limitation.</p>
+
+    <p>For Max Increment any positive number up to Max Step should be fine.</p>
+
+    <p>You will probably want to tick the Absolute property but
+        using it as a Relative focuser is ok too. Absolute mode reports the Position 
+    of the focuser so that you can come back to a known point. However, if there 
+    is any slippage in the mechanics all bets are off and you may find that returning 
+    the focuser to a previously good Position does not reset the optics exactly
+     where they were.</p>
+
+    <p>Increase the Timeout if for any reason you fail to make connection with
+     the focuser (assuming you have set the correct Comm Port!)</p>
+
+    <p>The ResetToZero button will be active when the driver has established connection.
+     Pressing it will do two things: Reset the coils of the stepper motor to the 
+    phase at initial Position (this might cause the focuser to physically move a 
+    few nominal steps) and set the Position to zero. The stepper is run in half-step
+     mode so each nominal step is half a full step. In half-step mode, there's 8 
+    different coil phases so the jump to zero should not be more 4 half-steps away.</p>
+    <p>My focuser has a physical switch that allows me to cut the power to the coils. I can
+    then move the focuser manually near the focus position, hit ResetToZero and turn the power
+    back on, without disconnecting the focuser.</p>
+    <p>The driver implements a SupportedAction Focuser:ResetToZero so any clients that are so 
+    inclined can include a control to do this action.</p>
+    <h1>Internals</h1>
+    <p>The driver assumes every motor step is successful and results in a fixed linear 
+    distance travelled. There's no other feedback of position. This means there must be no
+    slippage in the mechanics and it's up to you to adjust the mechanical tension and alignment
+    of parts to make sure that is so. A single letter is sent down the serial port to the Arduino
+    (the speed is 19200). An "f" provokes a forward step and a "b" a backwards step. "F" and"B" 
+    force 10 steps at a time.</p>
+</body>
+</html>

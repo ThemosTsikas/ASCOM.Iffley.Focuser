@@ -2,3 +2,7 @@
 /ASCOM.Iffley.Focuser/bin/Debug
 /ASCOM.Iffley.Focuser/obj
 /TestIffley/obj/x86/Debug
+/TestIffley/bin/Release
+/TestIffley/obj/x86/Release/TempPE
+/TestIffley/obj/x86/Release
+/ASCOM.Iffley.Focuser/bin/Release

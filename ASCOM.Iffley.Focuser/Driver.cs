@@ -15,6 +15,8 @@
 // 13-May-2016	TTT	2.0.0	Initial edit, created from ASCOM driver template
 // 14-May-2016	TTT	2.0.1	Added Tim Long's SettingsProvider hooks
 // 15-May-2016  TTT 2.1.0   Added test program and SupportedAction ResetToZero
+// 16-May-2016  TTT 2.1.1   refactored the ResetToZero function, in Dialog and via Action
+// 16-May-2016  TTT 3.0.0   new protocol, "idIDz" until we figure out timings for larger steps
 // --------------------------------------------------------------------------------
 //
 
@@ -60,17 +62,17 @@ namespace ASCOM.Iffley
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        public const string driverDescription = "Iffley Arduino unipolar stepper motor focuser.";
+        public const string driverDescription = "Iffley Arduino unipolar stepper motor focuser";
 
         /// <summary>
         /// Themos's added variables. 
         /// Things I need to know in order to process requests
-        public static bool m_Connected = false; // am I connected to the Arduino
-        public static SerialPort m_Port;        // the port the Arduino is on
-        public static int m_Position;           // the current position of the focuser
-        private ArrayList m_Actions;            // the supported actions
-        private int m_MaxIncrement;             // the end of travel position (begins at 0)
-        private int m_MaxStep;                  // the biggest step I can handle
+        public static bool m_Connected = false;        // am I connected to the Arduino
+        private static SerialPort m_Port;              // the port the Arduino is on
+        private static int m_Position;                 // the current position of the focuser
+        private static ArrayList m_Actions;            // the supported actions
+        private static int m_MaxIncrement;             // the end of travel position (begins at 0)
+        private static int m_MaxStep;                  // the biggest step I can handle
         /// </summary>
 
         /// <summary>
@@ -149,7 +151,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                tl.LogMessage("SupportedActions Get", m_Actions.ToString());
+                tl.LogMessage("SupportedActions Get", m_Actions[0].ToString() + "...");
                 return m_Actions;
             }
         }
@@ -160,17 +162,13 @@ namespace ASCOM.Iffley
             {
                 if (m_Connected)
                 {
-                    m_Port.Write("z");
-                    // Arduino always reports the new position (as a string)
-                    // convert it to a number
-                    m_Position = Convert.ToInt32(m_Port.ReadLine());
-                    FancyLogMessage("Action", "ResetToZero successful");
+                    ResetToZero();
                     return "OK";
                 }
                 else
                 {
                     tl.LogMessage("Action", "ResetToZero failed, not connected");
-                    return "";
+                    return "FAIL";
                 }
             }
             else
@@ -247,7 +245,7 @@ namespace ASCOM.Iffley
         {
             get
             {
-                string driverVersion = "2.1";
+                string driverVersion = "3.0";
                 tl.LogMessage("DriverVersion Get", driverVersion);
                 return driverVersion;
             }
@@ -347,7 +345,7 @@ namespace ASCOM.Iffley
                             // and then the position. when it resets
                             string position = m_Port.ReadLine();
                             m_Position = Convert.ToInt32(position);
-                            tl.LogMessage("Connected Set", "Confirmation " + Regex.Replace(version,@"\t|\r|\n",""));
+                            tl.LogMessage("Connected Set", "Confirmation " + Regex.Replace(version, @"\t|\r|\n", ""));
                         }
                         catch (TimeoutException)
                         {
@@ -400,7 +398,8 @@ namespace ASCOM.Iffley
             string position;
             tl.LogMessage("Move", val.ToString());
             current = m_Position;
-            // The Arduino always reports an absolute position after each single-step command ("f" or "b")
+            // The Arduino always reports an absolute position after each single-step 
+            // command ("f" or "b", "F" or "B", "u" or "d" )
             if (Properties.Settings.Default.AbsoluteEnabled)
             {
                 // we need to interpret val as an absolute position
@@ -433,47 +432,73 @@ namespace ASCOM.Iffley
             // now that target is sensible we just do single steps until we get there 
             while (target != current)
             {
-                if (target > 10 + current)
+                if (false && (target > 100 + current))
                 {
-                    // we need to increase the position, ask the Arduino to turn the stepper forward one big step (10)
-                    m_Port.Write("F");
+                    // we need to increase the position, ask the Arduino to turn the 
+                    // stepper forward one giant step (100)
+                    m_Port.Write("C");
                     // Arduino always reports the new position (as a string)
                     position = m_Port.ReadLine();
                     // convert it to a number
                     current = Convert.ToInt32(position);
                     m_Position = current;
-                    tl.LogMessage("Move", "F step");
+                    tl.LogMessage("Move", "C step");
+                }
+                else if (target > 10 + current)
+                {
+                    // we need to increase the position, ask the Arduino to turn the 
+                    // stepper forward one big step (10)
+                    m_Port.Write("D");
+                    // Arduino always reports the new position (as a string)
+                    position = m_Port.ReadLine();
+                    // convert it to a number
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                    tl.LogMessage("Move", "D step");
                 }
                 else if (target > current)
                 {
                     // we need to increase the position, ask the Arduino to turn the stepper forward one step
-                    m_Port.Write("f");
+                    m_Port.Write("I");
                     // Arduino always reports the new position (as a string)
                     position = m_Port.ReadLine();
                     // convert it to a number
                     current = Convert.ToInt32(position);
                     m_Position = current;
-                    tl.LogMessage("Move", "f step");
+                    tl.LogMessage("Move", "I step");
+
+                }
+                else if (false && (target < current - 100))
+                {
+                    // we need to decrease the position, ask the Arduino to turn the 
+                    // stepper backwards one giant step (100)
+                    m_Port.Write("c");
+                    position = m_Port.ReadLine();
+                    current = Convert.ToInt32(position);
+                    m_Position = current;
+                    tl.LogMessage("Move", "c step");
 
                 }
                 else if (target < current - 10)
                 {
-                    // we need to decrease the position, ask the Arduino to turn the stepper backwards one big step (10)
-                    m_Port.Write("B");
+                    // we need to decrease the position, ask the Arduino to turn the
+                    // stepper backwards one big step (10)
+                    m_Port.Write("d");
                     position = m_Port.ReadLine();
                     current = Convert.ToInt32(position);
                     m_Position = current;
-                    tl.LogMessage("Move", "B step");
+                    tl.LogMessage("Move", "d step");
 
                 }
                 else if (target < current)
                 {
-                    // we need to decrease the position, ask the Arduino to turn the stepper backwards one step
-                    m_Port.Write("b");
+                    // we need to decrease the position, ask the Arduino to turn the
+                    // stepper backwards one step
+                    m_Port.Write("i");
                     position = m_Port.ReadLine();
                     current = Convert.ToInt32(position);
                     m_Position = current;
-                    tl.LogMessage("Move", "b step");
+                    tl.LogMessage("Move", "i step");
                 }
             }
         }
@@ -639,6 +664,15 @@ namespace ASCOM.Iffley
         {
             var msg = string.Format(message, args);
             tl.LogMessage(identifier, msg);
+        }
+        internal static void ResetToZero()
+        {
+            m_Port.Write("z");
+            // Arduino always reports the new position (as a string)
+            // convert it to a number
+            m_Position = Convert.ToInt32(m_Port.ReadLine());
+            tl.LogMessage("Action", "ResetToZero successful");
+
         }
         #endregion
     }

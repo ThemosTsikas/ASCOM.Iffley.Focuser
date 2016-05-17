@@ -17,6 +17,7 @@ namespace ASCOM.Iffley
         {
             InitializeComponent();
             // Initialise current values of user settings from the ASCOM Profile
+            button1.Enabled = Focuser.m_Connected;
         }
 
         private void cmdOK_Click(object sender, EventArgs e) // OK button event handler
@@ -69,13 +70,16 @@ namespace ASCOM.Iffley
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!Focuser.m_Connected)
-                System.Windows.Forms.MessageBox.Show("Only possible when connected, just press OK");
+            if (Focuser.m_Connected)
+                Focuser.ResetToZero();
             else
-            {
-                Focuser.m_Port.Write("z");
-                Focuser.m_Position = 0;
-            }
+                System.Windows.Forms.MessageBox.
+                    Show("Only possible when connected, just press OK");
+        }
+
+        private void SetupDialogForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

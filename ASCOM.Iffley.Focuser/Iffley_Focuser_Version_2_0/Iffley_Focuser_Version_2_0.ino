@@ -41,7 +41,7 @@ void setup()
   // opens serial port, sets data rate to 19200 bps
   Serial.begin(19200);	
   // send the identification
-  Serial.println("Iffley Focuser Version 2.1");
+  Serial.println("Iffley Focuser Version 3.0");
   // set the position to zero
   position = 0;
   // set the coils to phase corresponding to position
@@ -55,6 +55,7 @@ void loop()
 {
   // variable for the byte we read off the serial port
   int incomingByte;
+  int lv1;
   
   // this is a busy loop
   // most times there will be nothing available
@@ -65,43 +66,42 @@ void loop()
     incomingByte = Serial.read();
     // check for known values
     switch(incomingByte) {
-    case 'f':
+    case 'I':
     // a command to move forward, do it and update the position
       position = forward(position);
       break;
-    case 'F':
+    case 'D':
     // a command to move forward, do it and update the position
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
-      position = forward(position);
+      for (lv1=1;lv1<=10;lv1++) position = forward(position);
       break;
-    case 'b':
+    case 'C':
+    // a command to move forward, do it and update the position
+      for (lv1=1;lv1<=100;lv1++) {
+	   position = forward(position);
+       delay(1);
+      }
+	  break;
+    case 'i':
     // a command to move backward, do it and update the position
       position = backward(position);
       break;
-    case 'B':
+    case 'd':
     // a command to move backward, do it and update the position
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      position = backward(position);
-      break;    case 'z':
+      for (lv1=1;lv1<=10;lv1++) position = backward(position);
+	    break;
+    case 'c':
+    // a command to move backward, do it and update the position
+      for (lv1=1;lv1<=100;lv1++){
+        position = backward(position);
+        delay(1); 
+      }
+    break;
+    case 'z':
     // a command to reset, set phase to 0 and update the position
       position = 0;
       phaserinit(position);
+      break;
+    default:
       break;
     }
     // now ALWAYS report the position

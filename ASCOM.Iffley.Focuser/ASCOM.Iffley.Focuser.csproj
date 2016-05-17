@@ -110,13 +110,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SetupDialog.png" />
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
     <None Include="ASCOM.png" />
     <None Include="ASCOMDriverTemplate.snk" />
     <None Include="ClassDiagram1.cd" />
-    <None Include="Iffley_Focuser_Version_2_0.ino" />
+    <None Include="Iffley_Focuser_Version_2_0\Iffley_Focuser_Version_2_0.ino" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -124,6 +125,7 @@
     <Content Include="ASCOM.ico" />
     <Content Include="ASCOM.Iffley.Focuser.Validation.txt" />
     <Content Include="Iffley Setup.iss" />
+    <Content Include="IffleyReadme.html" />
     <Content Include="IffleyReadme.txt" />
     <Content Include="ReadMe.htm" />
     <None Include="Resources\ASCOM.bmp" />
@@ -145,6 +147,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
