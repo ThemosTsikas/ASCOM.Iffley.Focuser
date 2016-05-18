@@ -127,7 +127,6 @@
     <Content Include="ASCOM.Iffley.Focuser.Validation.txt" />
     <Content Include="Iffley Setup.iss" />
     <Content Include="IffleyReadme.html" />
-    <Content Include="IffleyReadme.txt" />
     <Content Include="ReadMe.htm" />
     <None Include="Resources\ASCOM.bmp" />
   </ItemGroup>
